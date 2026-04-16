@@ -24,7 +24,7 @@ export default async function ProfilePage() {
         <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
         <img
           src={user.picture || "https://avatar.vercel.sh/user.png"} // Kullanıcının profil resmi veya varsayılan resim
-          alt={user.name}
+          alt={`${user.name}'s profile picture`}
           className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
         />
         <CardHeader>
