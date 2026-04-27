@@ -1,15 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { CreateProductPayload } from "@/lib/schemas";
 
-
-export type CreateProductPayload = {
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  category: string;
-  images: string[]; // Blob'a yüklendikten sonra buraya sadece URL'ler gelecek
-  currency?: string; 
-};
 
 export const createProduct = async (data: CreateProductPayload) => {
   
@@ -22,8 +13,39 @@ export const createProduct = async (data: CreateProductPayload) => {
       category: data.category,
       images: data.images, 
       currency: data.currency || "USD",
+      stripeProductId: data.stripeProductId,
+      stripePriceId: data.stripePriceId,
     },
   });
 
   return newProduct;
+};
+// 2. Tüm Ürünleri Getir (Admin listesi için)
+export const getAllProducts = async () => {
+  return await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+};
+
+// 3. Tek Bir Ürünü ID ile Getir (Edit sayfası ve detaylar için)
+export const getProductById = async (id: string) => {
+   if (!id) return null;
+  return await prisma.product.findUnique({
+    where: { id },
+  });
+};
+
+// 4. Ürünü Güncelle (updateProductAction için)
+export const updateProduct = async (id: string, data: any) => {
+  return await prisma.product.update({
+    where: { id },
+    data: data,
+  });
+};
+
+// 5. Ürünü Sil (deleteProductAction için)
+export const deleteProductFromDb = async (id: string) => {
+  return await prisma.product.delete({
+    where: { id },
+  });
 };

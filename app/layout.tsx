@@ -4,6 +4,7 @@ import "./globals.css";
 import { auth0 } from "@/lib/auth0";
 import Navbar from "@/components/Navbar";
 import { getAdmin } from "@/lib/authz";
+import { CartProvider } from "@/context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,8 +33,10 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <body className="min-h-full flex flex-col">
-          <Navbar session={session} isAdmin={isAdmin} />
-          <main>{children}</main>
+          <CartProvider>
+            <Navbar session={session} isAdmin={isAdmin} />
+            <main>{children}</main>
+          </CartProvider>
         </body>
       </html>
     );

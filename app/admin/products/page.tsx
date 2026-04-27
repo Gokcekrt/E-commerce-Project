@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getAllProducts } from "@/services/productService";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,12 +15,11 @@ import {
 import { deleteProductAction } from "@/actions/productActions";
 
 export default async function AdminPage() {
-  const products = await prisma.product.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 8,
-  });
+  // 2. Prisma sorgusu yerine servis fonksiyonunu çağırdık
+  const products = await getAllProducts();
+
   return (
-    <main className="max-w-6xl mx-auto my-auto border rounded-lg overflow-hidden shadow-sm">
+    <main className="max-w-6xl mx-auto my-10 border rounded-lg overflow-hidden shadow-sm">
       <section className="w-full bg-white py-12 px-6 border-b ">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-left space-y-1">
@@ -36,14 +35,15 @@ export default async function AdminPage() {
           </Button>
         </div>
       </section>
+
       <div className="max-w-6xl mx-auto border rounded-lg overflow-hidden shadow-sm">
         <Table>
+          {/* products.length artık servisten gelen veriyi kullanıyor */}
           <TableCaption>A total of {products.length} products</TableCaption>
           <TableHeader className="bg-slate-50">
             <TableRow>
               <TableHead className="w-[80px]">Image</TableHead>
               <TableHead className="w-[100px]">Product Id-Title</TableHead>
-
               <TableHead>Stock Status</TableHead>
               <TableHead className="text-center">Price</TableHead>
               <TableHead className="text-center">Actions</TableHead>
@@ -61,6 +61,7 @@ export default async function AdminPage() {
                       src={product.images[0] || "/placeholder.jpg"}
                       alt={product.title}
                       fill
+                      sizes="48px"
                       className="object-cover"
                     />
                   </div>
@@ -91,8 +92,7 @@ export default async function AdminPage() {
                 <TableCell className="text-right font-medium">
                   {product.currency} {product.price.toFixed(2)}
                 </TableCell>
-                <TableCell className="  text-right space-x-2">
-                  {/* Edit ve Delete Butonları */}
+                <TableCell className="text-right space-x-2">
                   <div className="flex justify-center items-center gap-2">
                     <Button variant="ghost" className="h-8 w-8" asChild>
                       <Link href={`/admin/products/edit/${product.id}`}>

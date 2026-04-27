@@ -10,6 +10,7 @@ import {
   Heart,
   LayoutDashboard,
   UserPlus,
+  ShoppingCart,
 } from "lucide-react";
 import { Auth0SessionUser } from "@/lib/authz";
 import {
@@ -19,6 +20,7 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { useCart } from "@/context/CartContext";
 
 export default function Navbar({
   session,
@@ -28,6 +30,12 @@ export default function Navbar({
   isAdmin?: boolean;
 }) {
   const pathname = usePathname();
+  const { cartItems } = useCart();
+
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0,
+  );
 
   if (pathname?.startsWith("/admin")) {
     return null;
@@ -42,7 +50,7 @@ export default function Navbar({
         <div className="font-bold text-xl flex items-center gap-2">
           <Link
             href="/"
-            className="tracking-[0.2em] text-sm uppercase font-light text-slate-900"
+            className="tracking-[0.2em] text-sm uppercase font-light text-slate-900 flex items-center gap-2"
           >
             <Heart className="w-6 h-6 text-blue-600" />
             Pure<span className="font-bold text-slate-950">Science</span>
@@ -55,8 +63,24 @@ export default function Navbar({
                 asChild
                 className={navigationMenuTriggerStyle()}
               >
-                <Link href="/">
+                <Link href="/" className="flex items-center">
                   <Home className="w-4 h-4 mr-2" /> Home
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
+                <Link href="/cart" className="flex items-center">
+                  <ShoppingCart className="w-4 h-4 mr-2 text-indigo-600" /> Cart
+                  {cartItemCount > 0 && (
+                    <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {cartItemCount}
+                    </span>
+                  )}
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -85,7 +109,7 @@ export default function Navbar({
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link href="/user/profile">
+                    <Link href="/user/profile" className="flex items-center">
                       <User className="w-4 h-4 mr-2" /> Profile
                     </Link>
                   </NavigationMenuLink>
@@ -96,8 +120,11 @@ export default function Navbar({
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link href="/auth/logout">
-                      <LogOut className="w-4 h-4 mr-2 text-red-500" /> Logout
+                    <Link
+                      href="/auth/logout"
+                      className="flex items-center text-red-500"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" /> Logout
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
@@ -109,19 +136,25 @@ export default function Navbar({
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link href="/auth/login">
-                      <LogIn className="w-4 h-4 mr-2 text-green-600" /> Login
+                    <Link
+                      href="/auth/login"
+                      className="flex items-center text-green-600"
+                    >
+                      <LogIn className="w-4 h-4 mr-2" /> Login
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
+
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link href="/auth/login?screen_hint=signup">
-                      <UserPlus className="w-4 h-4 mr-2 text-blue-600" />
-                      Sign Up
+                    <Link
+                      href="/auth/login?screen_hint=signup"
+                      className="flex items-center text-blue-600"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" /> Sign Up
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>

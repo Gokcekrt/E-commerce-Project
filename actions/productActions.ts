@@ -1,53 +1,80 @@
 "use server";
-
+import {ProductSchema} from "@/lib/schemas"; 
+import { stripe } from "@/lib/stripe"; 
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
-import { createProduct } from "@/services/productService";
+import { createProduct, getProductById, updateProduct } from "@/services/productService";
 import { revalidatePath } from "next/cache";
-
-import { getAdmin } from "@/lib/authz"; // Doğru auth fonksiyonunu çekiyoruz
+import { redirect } from "next/navigation";
+import { getAdmin } from "@/lib/authz";
 
 export const addProductAction = async (prevState: any,formData: FormData) => {
+  
   
   const adminUser = await getAdmin();
   if (!adminUser) {
     return { error: "Only users with admin privileges can add products." };
   }
+const rawData = Object.fromEntries(formData.entries()); // Formdaki her şeyi objeye çevirir
+const validatedFields = ProductSchema.safeParse(rawData);
 
-  
-  const title = (formData.get("title") as string) || "";
-  const price = parseFloat(formData.get("price") as string) || 0;
-  const description = (formData.get("description") as string) || "";
-  const stock = parseInt(formData.get("stock") as string) || 0;
-  const category = (formData.get("category") as string) || "General";
-  const currency = (formData.get("currency") as string) || "USD";
+  if (!validatedFields.success) {
+   
+    return { 
+      error: "Validation failed", 
+      details: validatedFields.error.flatten().fieldErrors 
+    };
+  }
+  const { title, description, price, stock, category, currency } = validatedFields.data;
   const image = formData.get("image") as File | null;
 
-  
-  if (!title || price <= 0 || !description || !image || image.size === 0) {
-    return { error: "Please fill in all required fields and upload a valid image." };
+  if (!image || image.size === 0){console.log("--- X. RESİM EKSİK ---"); return { error: "Image is required." };} 
+
+  try {
+    
+    // 3. Vercel Blob Upload
+    const filename = `products/${Date.now()}-${image.name}`;
+    const blob = await put(filename, image, {
+      access: "public",
+      addRandomSuffix: true,
+    });
+
+    
+    // Önce Stripe'ta ürünü oluşturuyoruz
+    const stripeProduct = await stripe.products.create({
+      name: title,
+      description: description,
+      images: [blob.url],
+    });
+
+    //  bu ürüne bağlı fiyatı oluşturuyoruz
+    const stripePrice = await stripe.prices.create({
+      product: stripeProduct.id,
+      unit_amount: Math.round(price * 100),
+      currency: currency.toLowerCase(),
+    });
+
+    // 5. Veritabanına Kayıt
+    await createProduct({
+      title,
+      description,
+      price,
+      stock,
+      category,
+      currency,
+      images: [blob.url],
+      stripeProductId: stripeProduct.id, 
+      stripePriceId: stripePrice.id,     
+    });
+
+    revalidatePath("/admin/products");
+    
+  } catch (err: any) {
+    
+    console.error("Stripe/DB Error:", err);
+    return { error: "Failed to create product in Stripe or Database." };
   }
 
-  
-  const filename = `products/${Date.now()}-${image.name}`;
-  const blob = await put(filename, image, {
-    access: "public",
-    addRandomSuffix: true, 
-  });
-
- 
-  await createProduct({
-    title,
-    description,
-    price,
-    stock,
-    category,
-    currency,
-    images: [blob.url], // Sadece Blob'dan dönen URL'yi gönderiyoruz
-  });
-
-  
-  revalidatePath("/admin/products");
   redirect("/admin/products");
 };
 
@@ -77,34 +104,70 @@ export const deleteProductAction = async (formData: FormData) => {
   redirect("/admin/products");
 };
 
-export const updateProductAction = async (formData: FormData) => {
-
+export const updateProductAction = async (prevState: any, formData: FormData) => {
   const adminUser = await getAdmin();
-  if (!adminUser) {
-    return { error: "Only users with admin privileges can update products." };
+  if (!adminUser) return { error: "Admin authentication required." };
+
+  const rawData = Object.fromEntries(formData.entries());
+  const validatedFields = ProductSchema.safeParse(rawData);
+
+  if (!validatedFields.success) {
+    return { error: "Validation error", details: validatedFields.error.flatten().fieldErrors };
   }
 
+  // Zod'dan gelen tertemiz verileri alıyoruz
+  const { title, price, description, stock, currency, category } = validatedFields.data;
   const productId = formData.get("id") as string;
-  const title = (formData.get("title") as string) || "";
-  const price = parseFloat(formData.get("price") as string) || 0;
-  const description = (formData.get("description") as string) || "";
-  const stock = parseInt(formData.get("stock") as string) || 0;
-  const currency = (formData.get("currency") as string) || "USD";
-  const category = (formData.get("category") as string) || "General";
 
-  await prisma.product.update({
-    where: { id: productId },
-    data: {
-      title,
-      price,
-      description,
-      stock,
-      currency,
-      category,
-      
-    },
-  });
+  try {
+    // 1. Mevcut ürünü bul (Eski Stripe ID'leri lazım)
+    const existingProduct = await getProductById(productId);
 
-  revalidatePath("/admin/products");
+    if (!existingProduct) return { error: "Product not found." };
+
+    if (!existingProduct.stripeProductId || !existingProduct.stripePriceId) {
+      return { error: "This product has no Stripe connection, cannot be updated." };
+    }
+
+    // Değişkeni try içinde güncelleyeceğiz 
+    let currentStripePriceId = existingProduct.stripePriceId;
+
+    
+    // Eğer fiyat değiştiyse Stripe'ta yeni fiyat oluşturmalıyız
+    if (price !== existingProduct.price) {
+      const newStripePrice = await stripe.prices.create({
+        product: existingProduct.stripeProductId!,
+        unit_amount: Math.round(price * 100),
+        currency: currency.toLowerCase(),
+      });
+      currentStripePriceId = newStripePrice.id;
+    }
+
+    // Ürün adı veya açıklaması değiştiyse Stripe ürününü de güncelle
+    if (title !== existingProduct.title || description !== existingProduct.description) {
+      await stripe.products.update(existingProduct.stripeProductId!, {
+        name: title,
+        description: description,
+      });
+    }
+
+    // 3. MONGODB GÜNCELLEME
+   await updateProduct(productId, {
+        title,
+        price,
+        description,
+        stock,
+        currency,
+        category,
+        stripePriceId: currentStripePriceId, 
+    });
+
+    revalidatePath("/admin/products");
+    
+  } catch (err: any) {
+    console.error("Update Error:", err);
+    return { error: "Failed to update product." };
+  }
+
   redirect("/admin/products");
 };
