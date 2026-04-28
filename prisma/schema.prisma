@@ -19,7 +19,7 @@ model Product {
   price           Float
   currency        String   @default("USD")
   category        String   @default("General")
-  images          String[] // Resimlerin URL'lerini dizi olarak tutacağız
+  images          String[]
   stock           Int      @default(0)
   stripeProductId String?
   stripePriceId   String?
@@ -30,5 +30,5 @@ model Product {
 model User {
   id    String @id @default(auto()) @map("_id") @db.ObjectId
   email String @unique
-  role  String @default("user") // 'admin' veya 'user'
+  role  String @default("user") // 'admin' or'user'
 }

@@ -3,7 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CartPage() {
@@ -19,16 +19,15 @@ export default function CartPage() {
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url; // Stripe'a uçuyoruz! ✈️
+        window.location.href = data.url; // Stripea
       } else {
         alert(data.error || "Bir hata oluştu");
       }
     } catch (err) {
-      console.error("Checkout hatası:", err);
-      alert("Ödeme başlatılamadı.");
+      alert("Payment could not be initiated.");
     }
   };
-  // 1. Durum: Sepet Boşsa
+  // Sepet Boşsa
   if (cartItems.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6">
@@ -48,7 +47,7 @@ export default function CartPage() {
     );
   }
 
-  // 2. Durum: Sepette Ürün Varsa
+  //Sepette Ürün Varsa
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 min-h-screen">
       <h1 className="text-3xl font-light tracking-tight text-slate-900 mb-10 uppercase">
@@ -56,7 +55,7 @@ export default function CartPage() {
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* SOL TARAF: Ürün Listesi */}
+        {/*  Ürün Listesi */}
         <div className="lg:col-span-2 space-y-6">
           {cartItems.map((item) => (
             <div
@@ -95,7 +94,7 @@ export default function CartPage() {
                   </button>
                 </div>
 
-                {/* Adet Artırma / Azaltma (Anna'nın özellikle istediği kısım) */}
+                {/* Arttırma azaltma için */}
                 <div className="flex items-center gap-4 mt-4">
                   <div className="flex items-center border border-slate-200 rounded-md">
                     <button
@@ -124,7 +123,7 @@ export default function CartPage() {
           ))}
         </div>
 
-        {/* SAĞ TARAF: Özet ve Ödeme */}
+        {/*sağ-özet */}
         <div className="bg-slate-50 p-8 rounded-xl h-fit border border-slate-100 shadow-sm">
           <h2 className="text-lg font-medium text-slate-900 mb-6 uppercase tracking-wider">
             Order Summary
@@ -150,10 +149,9 @@ export default function CartPage() {
 
           <Button
             className="w-full bg-slate-900 text-white hover:bg-slate-800 h-12 text-md tracking-wider group"
-            onClick={handleCheckout} // Artık fonksiyonu çağırıyor!
+            onClick={handleCheckout}
           >
             Checkout{" "}
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </div>

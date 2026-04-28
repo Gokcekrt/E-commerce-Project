@@ -1,18 +1,16 @@
 import { Button } from "@/components/ui/button";
-
 import Link from "next/link";
 import { ShoppingBag, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
-import CheckoutButton from "./CheckoutButton";
 import AddToCartButton from "@/components/AddToCartButton";
+import { Schema } from "zod";
 
 export default async function Home() {
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
-    take: 8,
   });
-  console.log("ANA SAYFA VERİSİ:", products[0]?.stripePriceId);
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-white">
       <section className="relative w-full h-[500px] flex items-center justify-center overflow-hidden border-b">

@@ -2,7 +2,7 @@
 
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { Product } from "@prisma/client"; // Prisma'dan gelen gerçek ürün tipi
+import { Product } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 
 export default function AddToCartButton({ product }: { product: Product }) {
@@ -10,7 +10,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
 
   return (
     <Button
-      variant="ghost" // veya kendi kullandığın bir varyant
+      variant="ghost"
       className="w-full mt-2 flex items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800"
       onClick={() => addToCart(product)}
     >

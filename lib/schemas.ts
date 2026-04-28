@@ -15,8 +15,8 @@ export type ProductInput = z.infer<typeof ProductSchema>;
 
 export type CreateProductPayload = z.infer<typeof ProductSchema> & {
   images: string[];
-  stripeProductId: string;
-  stripePriceId: string;
+  stripeProductId: string | null;
+  stripePriceId: string | null;
 };
 export type Product = CreateProductPayload & {
   id: string;

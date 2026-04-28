@@ -20,7 +20,7 @@ export const createProduct = async (data: CreateProductPayload) => {
 
   return newProduct;
 };
-// 2. Tüm Ürünleri Getir (Admin listesi için)
+// 2. Tüm Ürünleri Getir 
 export const getAllProducts = async () => {
   return await prisma.product.findMany({
     orderBy: { createdAt: "desc" },

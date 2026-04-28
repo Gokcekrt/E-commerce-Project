@@ -28,7 +28,7 @@ const validatedFields = ProductSchema.safeParse(rawData);
   const { title, description, price, stock, category, currency } = validatedFields.data;
   const image = formData.get("image") as File | null;
 
-  if (!image || image.size === 0){console.log("--- X. RESİM EKSİK ---"); return { error: "Image is required." };} 
+  if (!image || image.size === 0){ return { error: "Image is required." };} 
 
   try {
     
@@ -71,14 +71,14 @@ const validatedFields = ProductSchema.safeParse(rawData);
     
   } catch (err: any) {
     
-    console.error("Stripe/DB Error:", err);
+   
     return { error: "Failed to create product in Stripe or Database." };
   }
 
   redirect("/admin/products");
 };
 
-export const deleteProductAction = async (formData: FormData) => {
+export const deleteProductAction = async (prevState: any,formData: FormData) => {
   
   const adminUser = await getAdmin();
   if (!adminUser) {
@@ -115,7 +115,7 @@ export const updateProductAction = async (prevState: any, formData: FormData) =>
     return { error: "Validation error", details: validatedFields.error.flatten().fieldErrors };
   }
 
-  // Zod'dan gelen tertemiz verileri alıyoruz
+  // Zod'dan gelen verileri alıyoruz
   const { title, price, description, stock, currency, category } = validatedFields.data;
   const productId = formData.get("id") as string;
 

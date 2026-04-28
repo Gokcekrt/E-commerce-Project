@@ -12,8 +12,8 @@ AUTH0_CLIENT_SECRET='client-secret-'
 DATABASE_URL="mongodb+srv://kullanici:sifre@cluster.xxxx.mongodb.net/database_adi"
 
 # --- STRIPE 
-STRIPE_SECRET_KEY='sk_test_buraya-kendi-anahtarini-yazma'
-STRIPE_WEBHOOK_SECRET='whsec_webhook-anahtari-buraya'
+STRIPE_SECRET_KEY='sk_test_'
+STRIPE_WEBHOOK_SECRET='whsec_webhook-'
 
 # --- VERCEL BLOB 
 BLOB_READ_WRITE_TOKEN='token-'

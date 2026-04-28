@@ -1,5 +1,5 @@
 import { getAllProducts } from "@/services/productService";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { deleteProductAction } from "@/actions/productActions";
+import { DeleteProductForm } from "@/components/DeleteProductForm";
 
 export default async function AdminPage() {
   // 2. Prisma sorgusu yerine servis fonksiyonunu çağırdık
@@ -99,16 +99,7 @@ export default async function AdminPage() {
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <form action={deleteProductAction}>
-                      <input type="hidden" name="id" value={product.id} />
-                      <Button
-                        type="submit"
-                        variant="ghost"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </form>
+                    <DeleteProductForm productId={product.id} />
                   </div>
                 </TableCell>
               </TableRow>

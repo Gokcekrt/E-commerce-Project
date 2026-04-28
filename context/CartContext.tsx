@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { Product } from "@/lib/schemas";
 
-// Sepetteki ürünün tipi
+// Sepetteki ürün
 export interface CartItem {
   id: string;
   title: string;
@@ -14,7 +15,7 @@ export interface CartItem {
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: any) => void;
+  addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -27,7 +28,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Sadece basit bir state kullanıyoruz, sayfa yenilenince sıfırlıcak
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: Product) => {
     setCartItems((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
       if (existingItem) {
