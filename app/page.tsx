@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
-
 import Link from "next/link";
 import { ShoppingBag, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
+import AddToCartButton from "@/components/AddToCartButton";
+import { Schema } from "zod";
 
 export default async function Home() {
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
-    take: 8,
   });
 
   return (
@@ -16,15 +16,14 @@ export default async function Home() {
       <section className="relative w-full h-[500px] flex items-center justify-center overflow-hidden border-b">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/background.jpg" // Buraya kendi bulduğun veya benim önerdiğim bir görseli koyabilirsin
+            src="/background.jpg"
             alt="Skincare Hero"
             fill
-            className="object-cover " // Silik olması için opacity-20 verdik
+            className="object-cover "
             priority
           />
         </div>
 
-        {/* İçerik (z-10 ile resmin üzerine çıkardık) */}
         <div className="relative z-10 max-w-3xl mx-auto space-y-6 px-4 text-center">
           <span className="text-[10px] uppercase tracking-[0.4em] text-blue-600 font-bold block mb-2">
             Skincare and Skinfood
@@ -82,9 +81,8 @@ export default async function Home() {
                   )}
 
                   <div className="absolute inset-x-4 bottom-4 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <Button className="w-full bg-white/90 backdrop-blur-sm text-slate-900 hover:bg-white rounded-none border-none shadow-xl text-[10px] uppercase tracking-widest font-bold h-10">
-                      Quick View
-                    </Button>
+                    <Button variant="quickview">Quick View</Button>
+                    <AddToCartButton product={product} />
                   </div>
                 </div>
 
