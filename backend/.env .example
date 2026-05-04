@@ -1,0 +1,5 @@
+
+STRIPE_SECRET_KEY=test
+STRIPE_WEBHOOK_SECRET=whsec_... (Stripe CLI'dan alacağız)
+PORT=8000
+RESEND_API_KEY=""
