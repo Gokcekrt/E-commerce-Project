@@ -1,5 +1,5 @@
 import { getAllProducts } from "@/services/productService";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DeleteProductForm } from "@/components/DeleteProductForm";
+import { buttonVariants } from "@/components/ui/button";
+import { deleteProductAction } from "@/actions/productActions";
 
 export default async function AdminPage() {
-  // 2. Prisma sorgusu yerine servis fonksiyonunu çağırdık
   const products = await getAllProducts();
 
   return (
@@ -28,17 +28,17 @@ export default async function AdminPage() {
             </h1>
           </div>
 
-          <Button asChild variant="outline">
-            <Link href="/admin/products/create">
-              <Plus className="w-4 h-4 mr-2" /> Add New Product
-            </Link>
-          </Button>
+          <Link
+            href="/admin/products/create"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <Plus className="w-4 h-4 mr-2" /> Add New Product
+          </Link>
         </div>
       </section>
 
       <div className="max-w-6xl mx-auto border rounded-lg overflow-hidden shadow-sm">
         <Table>
-          {/* products.length artık servisten gelen veriyi kullanıyor */}
           <TableCaption>A total of {products.length} products</TableCaption>
           <TableHeader className="bg-slate-50">
             <TableRow>
@@ -50,60 +50,77 @@ export default async function AdminPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <TableRow
-                key={product.id}
-                className="hover:bg-slate-50/50 transition-colors"
-              >
-                <TableCell className="font-medium">
-                  <div className="relative w-12 h-12 rounded-md overflow-hidden border bg-slate-100">
-                    <Image
-                      src={product.images[0] || "/placeholder.jpg"}
-                      alt={product.title}
-                      fill
-                      sizes="48px"
-                      className="object-cover"
-                    />
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div>
-                    {product.title}
-                    <div className="text-[10px] text-slate-400 font-mono">
-                      ID: ...{product.id.slice(-6)}
+            {products.map((product) => {
+              const deleteWithId = deleteProductAction.bind(
+                null,
+                product.id,
+              ) as unknown as (formData: FormData) => Promise<void>;
+
+              return (
+                <TableRow
+                  key={product.id}
+                  className="hover:bg-slate-50/50 transition-colors"
+                >
+                  <TableCell className="font-medium">
+                    <div className="relative w-12 h-12 rounded-md overflow-hidden border bg-slate-100">
+                      <Image
+                        src={product.images[0] || "/placeholder.jpg"}
+                        alt={product.title}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                      product.stock > 10
-                        ? "bg-green-100 text-green-700"
-                        : product.stock > 0
-                          ? "bg-orange-100 text-orange-700"
-                          : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {product.stock > 0
-                      ? `${product.stock} in stock`
-                      : "Out of Stock"}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  {product.currency} {product.price.toFixed(2)}
-                </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <div className="flex justify-center items-center gap-2">
-                    <Button variant="ghost" className="h-8 w-8" asChild>
-                      <Link href={`/admin/products/edit/${product.id}`}>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      {product.title}
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        ID: ...{product.id.slice(-6)}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                        product.stock > 10
+                          ? "bg-green-100 text-green-700"
+                          : product.stock > 0
+                            ? "bg-orange-100 text-orange-700"
+                            : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {product.stock > 0
+                        ? `${product.stock} in stock`
+                        : "Out of Stock"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {product.currency} {product.price.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <div className="flex justify-center items-center gap-2">
+                      <Link
+                        className={buttonVariants({ variant: "ghost" })}
+                        href={`/admin/products/edit/${product.id}`}
+                      >
                         <Edit className="h-4 w-4" />
                       </Link>
-                    </Button>
-                    <DeleteProductForm productId={product.id} />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+
+                      <form action={deleteWithId}>
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </form>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

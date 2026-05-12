@@ -60,29 +60,30 @@ export default function Navbar({
           <NavigationMenuList className="flex items-center gap-x-2">
             <NavigationMenuItem>
               <NavigationMenuLink
-                asChild
                 className={navigationMenuTriggerStyle()}
-              >
-                <Link href="/" className="flex items-center">
-                  <Home className="w-4 h-4 mr-2" /> Home
-                </Link>
-              </NavigationMenuLink>
+                render={
+                  <Link href="/" className="flex items-center">
+                    <Home className="w-4 h-4 mr-2" /> Home
+                  </Link>
+                }
+              />
             </NavigationMenuItem>
 
             <NavigationMenuItem>
               <NavigationMenuLink
-                asChild
                 className={navigationMenuTriggerStyle()}
-              >
-                <Link href="/cart" className="flex items-center">
-                  <ShoppingCart className="w-4 h-4 mr-2 text-indigo-600" /> Cart
-                  {cartItemCount > 0 && (
-                    <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </Link>
-              </NavigationMenuLink>
+                render={
+                  <Link href="/cart" className="flex items-center">
+                    <ShoppingCart className="w-4 h-4 mr-2 text-indigo-600" />{" "}
+                    Cart
+                    {cartItemCount > 0 && (
+                      <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        {cartItemCount}
+                      </span>
+                    )}
+                  </Link>
+                }
+              />
             </NavigationMenuItem>
 
             {session ? (
@@ -90,73 +91,73 @@ export default function Navbar({
                 {isAdmin && (
                   <NavigationMenuItem>
                     <NavigationMenuLink
-                      asChild
                       className={navigationMenuTriggerStyle()}
-                    >
-                      <Link
-                        href="/admin/products"
-                        className="flex items-center"
-                      >
-                        <LayoutDashboard className="w-4 h-4 mr-2 text-blue-600" />{" "}
-                        Admin
-                      </Link>
-                    </NavigationMenuLink>
+                      render={
+                        <Link
+                          href="/admin/products"
+                          className="flex items-center"
+                        >
+                          <LayoutDashboard className="w-4 h-4 mr-2 text-blue-600" />{" "}
+                          Admin
+                        </Link>
+                      }
+                    />
                   </NavigationMenuItem>
                 )}
 
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    asChild
                     className={navigationMenuTriggerStyle()}
-                  >
-                    <Link href="/user/profile" className="flex items-center">
-                      <User className="w-4 h-4 mr-2" /> Profile
-                    </Link>
-                  </NavigationMenuLink>
+                    render={
+                      <Link href="/user/profile" className="flex items-center">
+                        <User className="w-4 h-4 mr-2" /> Profile
+                      </Link>
+                    }
+                  />
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    asChild
                     className={navigationMenuTriggerStyle()}
-                  >
-                    <Link
-                      href="/auth/logout"
-                      className="flex items-center text-red-500"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" /> Logout
-                    </Link>
-                  </NavigationMenuLink>
+                    render={
+                      <Link
+                        href="/auth/logout"
+                        className="flex items-center text-red-500"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" /> Logout
+                      </Link>
+                    }
+                  />
                 </NavigationMenuItem>
               </>
             ) : (
               <>
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    asChild
                     className={navigationMenuTriggerStyle()}
-                  >
-                    <Link
-                      href="/auth/login"
-                      className="flex items-center text-green-600"
-                    >
-                      <LogIn className="w-4 h-4 mr-2" /> Login
-                    </Link>
-                  </NavigationMenuLink>
+                    render={
+                      <Link
+                        href="/auth/login"
+                        className="flex items-center text-green-600"
+                      >
+                        <LogIn className="w-4 h-4 mr-2" /> Login
+                      </Link>
+                    }
+                  />
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    asChild
                     className={navigationMenuTriggerStyle()}
-                  >
-                    <Link
-                      href="/auth/login?screen_hint=signup"
-                      className="flex items-center text-blue-600"
-                    >
-                      <UserPlus className="w-4 h-4 mr-2" /> Sign Up
-                    </Link>
-                  </NavigationMenuLink>
+                    render={
+                      <Link
+                        href="/auth/login?screen_hint=signup"
+                        className="flex items-center text-blue-600"
+                      >
+                        <UserPlus className="w-4 h-4 mr-2" /> Sign Up
+                      </Link>
+                    }
+                  />
                 </NavigationMenuItem>
               </>
             )}

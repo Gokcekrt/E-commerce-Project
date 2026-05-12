@@ -8,8 +8,6 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
 
-  // ARTIK BURADA PRISMA YOK!
-  // Sadece servise "şu ID'li ürünü getir" diyoruz.
   const product = await getProductById(id);
 
   if (!product) {

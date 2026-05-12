@@ -3,6 +3,9 @@ import { Request, Response, NextFunction } from 'express';
 import { STRIPE_ENDPOINT_SECRET, stripe } from '../../common/stripe';
 import { PrismaClient } from '@prisma/client';
 import emailService from '../../services/emailService'; 
+import { PrismaClient, Prisma } from '@prisma/client';
+
+
 const prisma = new PrismaClient();
 
 
@@ -55,7 +58,7 @@ const receiveUpdates = async (request: Request, response: Response, next: NextFu
           userEmail: customerEmail,
           totalAmount: totalAmount,
           stripeSessionId: eventData.id,
-          items :lineItems as any //lineItems'ı OrderItem modeline uygun hale getirmek için as any kullanıyoruz}
+          items :lineItems as unknown as Prisma.InputJsonValue
       }});
       console.log(`New order created in database: ${newOrder.userEmail}`);
       await emailService.sendEmail(customerEmail, newOrder.id, totalAmount);

@@ -5,28 +5,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
-  const handleCheckout = async () => {
+
+  const handleCheckoutForm = async (formData: FormData) => {
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cartItems }), // Tüm sepeti gönderiyoruz
+        // FormData kullanmamıza rağmen, API'miz JSON beklediği için sepeti yine JSON olarak gönderiyoruz
+        body: JSON.stringify({ items: cartItems }),
       });
 
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url; // Stripea
+        window.location.href = data.url;
       } else {
-        alert(data.error || "Bir hata oluştu");
+        toast.error(data.error || "An error occurred during checkout.");
       }
     } catch (err) {
-      alert("Payment could not be initiated.");
+      toast.error("Payment could not be initiated.");
     }
   };
+
   // Sepet Boşsa
   if (cartItems.length === 0) {
     return (
@@ -55,7 +59,7 @@ export default function CartPage() {
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/*  Ürün Listesi */}
+        {/* Ürün Listesi */}
         <div className="lg:col-span-2 space-y-6">
           {cartItems.map((item) => (
             <div
@@ -123,7 +127,7 @@ export default function CartPage() {
           ))}
         </div>
 
-        {/*sağ-özet */}
+        {/* sağ-özet */}
         <div className="bg-slate-50 p-8 rounded-xl h-fit border border-slate-100 shadow-sm">
           <h2 className="text-lg font-medium text-slate-900 mb-6 uppercase tracking-wider">
             Order Summary
@@ -147,12 +151,14 @@ export default function CartPage() {
             <span>${cartTotal.toFixed(2)}</span>
           </div>
 
-          <Button
-            className="w-full bg-slate-900 text-white hover:bg-slate-800 h-12 text-md tracking-wider group"
-            onClick={handleCheckout}
-          >
-            Checkout{" "}
-          </Button>
+          <form action={handleCheckoutForm}>
+            <Button
+              type="submit"
+              className="w-full bg-slate-900 text-white hover:bg-slate-800 h-12 text-md tracking-wider group"
+            >
+              Checkout
+            </Button>
+          </form>
         </div>
       </div>
     </div>

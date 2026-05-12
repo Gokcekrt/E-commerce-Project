@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   try {
     const session = await auth0.getSession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Please sign in to checkout " }, { status: 401 });
     }
 
     // Sepetteki ürünleri body'den alıyoruz
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     }
 
     //Stripe'ın istediği formatta ürünleri hazırlıyoruz (line_items)
-    const line_items = items.map((item: any) => ({
+    const line_items = items.map((item: { stripePriceId: string; quantity: number }) => ({
       price: item.stripePriceId, // Stripe'taki Fiyat ID'si
       quantity: item.quantity,    // Kaç adet alındığı
     }));
@@ -34,8 +34,11 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch (err: any) {
-    console.error("Stripe Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("Stripe Error:", err.message);
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
   }
 }

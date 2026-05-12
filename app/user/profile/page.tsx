@@ -1,7 +1,7 @@
 import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -12,6 +12,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+import { Link, LogOut } from "lucide-react";
 
 export default async function ProfilePage() {
   const session = await auth0.getSession(); //session kullanıcı bilgilerini alıyor
@@ -46,9 +47,12 @@ export default async function ProfilePage() {
           <CardDescription>{user.email}</CardDescription>
         </CardHeader>
         <CardFooter className="border-t bg-gray-50/50 p-4">
-          <Button variant="destructive" className="w-full" asChild>
-            <a href="/auth/logout">Sign Out</a>
-          </Button>
+          <Link
+            href="/auth/logout"
+            className={buttonVariants({ variant: "destructive" })}
+          >
+            <LogOut>Sign Out</LogOut>
+          </Link>
         </CardFooter>
       </Card>
 

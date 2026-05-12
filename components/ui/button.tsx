@@ -1,32 +1,12 @@
-import React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import * as React from "react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  onClick?: () => void;
-  // Buraya "outline" ve "destructive" ekledim
-  variant?:
-    | "primary"
-    | "secondary"
-    | "ghost"
-    | "themeBtn"
-    | "outline"
-    | "destructive"
-    | "quickview"
-    | "addProduct";
-  className?: string;
-  children: React.ReactNode;
-  type?: "button" | "submit" | "reset";
-  asChild?: boolean;
-}
-
-export function Button({
-  asChild = false,
-  onClick,
+export function buttonVariants({
   variant = "primary",
   className = "",
-  children,
-  type = "button",
-}: ButtonProps) {
+}: {
+  variant?: string;
+  className?: string;
+}) {
   let variantStyles = "";
   switch (variant) {
     case "primary":
@@ -64,14 +44,43 @@ export function Button({
       break;
   }
 
-  const Comp = asChild ? Slot : "button";
-  return (
-    <Comp
-      type={asChild ? undefined : type}
-      onClick={onClick}
-      className={`py-2 px-4 rounded-md cursor-pointer transition-colors ${variantStyles} ${className}`}
-    >
-      {children}
-    </Comp>
-  );
+  return `py-2 px-4 rounded-md cursor-pointer transition-colors ${variantStyles} ${className}`.trim();
 }
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?:
+    | "primary"
+    | "secondary"
+    | "ghost"
+    | "themeBtn"
+    | "outline"
+    | "destructive"
+    | "quickview"
+    | "addProduct";
+  render?: React.ReactNode;
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, render, children, ...props }, ref) => {
+    const combinedClassName = buttonVariants({ variant, className });
+
+    if (render && React.isValidElement(render)) {
+      const renderElement = render as React.ReactElement<{
+        className?: string;
+      }>;
+
+      return React.cloneElement(renderElement, {
+        className:
+          `${combinedClassName} ${renderElement.props.className || ""}`.trim(),
+        ...props,
+      });
+    }
+
+    return (
+      <button className={combinedClassName} ref={ref} {...props}>
+        {children}
+      </button>
+    );
+  },
+);
+Button.displayName = "Button";

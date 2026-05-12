@@ -3,6 +3,8 @@ import Link from "next/link";
 import { CheckCircle2, ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Stripe } from "stripe";
+import { ExpandedLineItem } from "@/lib/types";
 
 export default async function SuccessPage({
   searchParams,
@@ -15,13 +17,13 @@ export default async function SuccessPage({
     return <div>We could not find your order information.</div>;
   }
 
-  // 1. Stripe'tan bu ödemenin detaylarını  çekiyoruz
+  // 1. Stripe'tan bu ödemenin detaylarını çekiyoruz
   const session = await stripe.checkout.sessions.retrieve(session_id, {
     expand: ["line_items", "line_items.data.price.product"], //sepetteki ürünlerin fiyat bilgisini paketini almak için expand ediyoruz
   });
 
   const customerName = session.customer_details?.name;
-  const items = session.line_items?.data;
+  const items = session.line_items?.data as ExpandedLineItem[] | undefined;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-20 text-center">
@@ -42,34 +44,53 @@ export default async function SuccessPage({
           Order Summary
         </h2>
         <div className="space-y-6">
-          {items?.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex justify-between items-center border-b border-slate-200 pb-4 last:border-0"
-            >
-              <div className="flex items-center gap-4">
-                <div className="relative w-12 h-12 bg-white rounded-md overflow-hidden border">
-                  {item.price.product.images?.[0] && (
-                    <Image
-                      src={item.price.product.images[0]}
-                      alt={item.description}
-                      fill
-                      className="object-cover"
-                    />
-                  )}
+          {items?.map((item) => {
+            // 1. Ürün bilgisini al
+            const product = item.price?.product;
+
+            // 2. Ürünün silinip silinmediğini kontrol et (Güvenlik Ağı)
+            const isDeleted = product && "deleted" in product;
+
+            // 3. Eğer silinmemişse resmi al, silinmişse null yap
+            const imageUrl = !isDeleted
+              ? (product as Stripe.Product).images?.[0]
+              : null;
+
+            return (
+              <div
+                key={item.id}
+                className="flex justify-between items-center border-b border-slate-200 pb-4 last:border-0"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="relative w-12 h-12 bg-slate-100 rounded-md overflow-hidden border flex items-center justify-center">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={item.description || "Product Image"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        No Img
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">
+                      {item.description}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Qty: {item.quantity}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    {item.description}
-                  </p>
-                  <p className="text-xs text-slate-500">Qty: {item.quantity}</p>
-                </div>
+                <p className="text-sm font-bold text-slate-900">
+                  ${(item.amount_total / 100).toFixed(2)}
+                </p>
               </div>
-              <p className="text-sm font-bold text-slate-900">
-                ${(item.amount_total / 100).toFixed(2)}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-6 pt-6 border-t border-slate-200 flex justify-between items-center">
