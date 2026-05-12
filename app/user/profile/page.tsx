@@ -14,7 +14,7 @@ import {
 export default async function ProfilePage() {
   const session = await auth0.getSession(); //session kullanıcı bilgilerini alıyor
   if (!session) {
-    redirect("/login");
+    redirect("/auth/login");
   }
   const { user } = session; //data structuring yaptık sürekli session.user.name gibi yazmamak için
 

@@ -1,7 +1,8 @@
-"use client"; // Form sayfan client component olmalı
+"use client";
 
-import { auth0 } from "@/lib/auth0";
-import { redirect } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom"; // Bunu ekledik
+import { addProductAction } from "@/actions/productActions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,26 +13,28 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addProductAction } from "@/actions/productActions";
-import { useActionState } from "react";
 
-export default async function CreateProductPage() {
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? "Saving..." : "Save Product"}
+    </Button>
+  );
+}
+
+export default function CreateProductPage() {
   const [state, formAction] = useActionState(addProductAction, null);
-  const session = await auth0.getSession();
-
-  if (!session) redirect("/auth/login");
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Add new Product</CardTitle>
-
           <CardDescription>Enter the product details below</CardDescription>
         </CardHeader>
-
         <CardContent>
-          <form action={addProductAction} className="grid w-full gap-6">
+          <form action={formAction} className="grid w-full gap-6">
             {state?.error && (
               <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50">
                 {state.error}
@@ -40,14 +43,7 @@ export default async function CreateProductPage() {
 
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
-
-              <Input
-                name="title"
-                id="title"
-                type="text"
-                placeholder="Computer"
-                required
-              />
+              <Input name="title" id="title" type="text" required />
             </div>
 
             <div className="grid gap-2">
@@ -61,6 +57,7 @@ export default async function CreateProductPage() {
                 required
               />
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="price">Currency</Label>
 
@@ -72,6 +69,7 @@ export default async function CreateProductPage() {
                 required
               />
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
 
@@ -83,6 +81,7 @@ export default async function CreateProductPage() {
                 required
               />
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="category">Category</Label>
 
@@ -94,6 +93,7 @@ export default async function CreateProductPage() {
                 required
               />
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="stock">Stock</Label>
 
@@ -105,9 +105,9 @@ export default async function CreateProductPage() {
                 required
               />
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="image">Image</Label>
-
               <Input
                 name="image"
                 id="image"
@@ -117,9 +117,8 @@ export default async function CreateProductPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Save
-            </Button>
+            {/* 4. ADIM: Kendi butonumuz buraya geldi */}
+            <SubmitButton />
           </form>
         </CardContent>
       </Card>

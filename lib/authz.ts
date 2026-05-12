@@ -70,7 +70,7 @@ export async function getSessionUser(): Promise<Auth0SessionUser | null> {
 
 export async function requireUser(): Promise<Auth0SessionUser> {
   const user = await getSessionUser();
-  if (!user) redirect("/api/auth/login");
+  if (!user) redirect("/auth/login");
   return user;
 }
 

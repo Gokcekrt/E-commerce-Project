@@ -1,7 +1,7 @@
 import React from "react";
 import { Slot } from "@radix-ui/react-slot";
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   onClick?: () => void;
   // Buraya "outline" ve "destructive" ekledim
   variant?:
@@ -10,7 +10,9 @@ interface ButtonProps {
     | "ghost"
     | "themeBtn"
     | "outline"
-    | "destructive";
+    | "destructive"
+    | "quickview"
+    | "addProduct";
   className?: string;
   children: React.ReactNode;
   type?: "button" | "submit" | "reset";
@@ -48,6 +50,14 @@ export function Button({
     case "themeBtn":
       variantStyles =
         "bg-transparent hover:bg-slate-100 dark:hover:bg-white/10";
+      break;
+    case "quickview":
+      variantStyles =
+        "w-full bg-white/90 backdrop-blur-sm text-slate-900 hover:bg-white rounded-none border-none shadow-xl text-[10px] uppercase tracking-widest font-bold h-10";
+      break;
+    case "addProduct":
+      variantStyles =
+        "w-full bg-indigo-500 text-white hover:bg-indigo-600 rounded-none border-none shadow-xl text-[10px] uppercase tracking-widest font-bold h-10";
       break;
     default:
       variantStyles = "bg-indigo-500 text-white";
