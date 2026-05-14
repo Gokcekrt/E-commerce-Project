@@ -4,7 +4,6 @@ import { ShoppingBag, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import AddToCartButton from "@/components/AddToCartButton";
-import { Schema } from "zod";
 
 export default async function Home() {
   const products = await prisma.product.findMany({
@@ -12,7 +11,7 @@ export default async function Home() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-white">
+    <div className="flex min-h-screen flex-col items-center bg-white">
       <section className="relative w-full h-[500px] flex items-center justify-center overflow-hidden border-b">
         <div className="absolute inset-0 z-0">
           <Image
@@ -102,6 +101,6 @@ export default async function Home() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

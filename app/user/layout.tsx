@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { requireUser } from "@/lib/authz";
 import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
+
+import { UserCircle } from "lucide-react";
 
 export default async function UserLayout({
   children,
@@ -21,11 +22,11 @@ export default async function UserLayout({
 
           <nav className="flex-1 py-8 px-4 ">
             <Link
-              href="/"
-              className="flex items-left px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-md transition-colors"
+              href="/user/profile"
+              className="flex items-center px-4 py-3 text-sm font-medium text-slate-900 bg-slate-50 rounded-md transition-colors"
             >
-              <LayoutDashboard className="w-4 h-4 mr-3 text-slate-400" />
-              My Orders
+              <UserCircle className="w-4 h-4 mr-3 text-slate-400" />
+              Profile Details
             </Link>
           </nav>
         </aside>

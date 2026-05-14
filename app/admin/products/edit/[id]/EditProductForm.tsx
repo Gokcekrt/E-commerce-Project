@@ -13,8 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function EditProductForm({ product }: { product: any }) {
-  // Artık prevState (state) ve formData uyumlu!
+import { Product } from "@/lib/schemas";
+
+export default function EditProductForm({ product }: { product: Product }) {
   const [state, formAction, isPending] = useActionState(
     updateProductAction,
     null,
@@ -27,7 +28,6 @@ export default function EditProductForm({ product }: { product: any }) {
         <CardDescription>Update the product details below</CardDescription>
       </CardHeader>
       <CardContent>
-        {/* action={formAction} kullanıyoruz */}
         <form action={formAction} className="grid w-full gap-6">
           {state?.error && (
             <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50">
@@ -35,7 +35,6 @@ export default function EditProductForm({ product }: { product: any }) {
             </div>
           )}
 
-          {/* Gizli ID inputu şart! */}
           <input type="hidden" name="id" value={product.id} />
 
           <div className="grid gap-2">

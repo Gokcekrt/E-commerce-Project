@@ -3,19 +3,20 @@ import {ProductSchema} from "@/lib/schemas";
 import { stripe } from "@/lib/stripe"; 
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
-import { createProduct, getProductById, updateProduct } from "@/services/productService";
+import { createProduct, deleteProductFromDb, getProductById, updateProduct } from "@/services/productService";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAdmin } from "@/lib/authz";
+import { Product } from "@prisma/client";
 
-export const addProductAction = async (prevState: any,formData: FormData) => {
+export const addProductAction = async (prevState: unknown,formData: FormData) => {
   
   
   const adminUser = await getAdmin();
   if (!adminUser) {
     return { error: "Only users with admin privileges can add products." };
   }
-const rawData = Object.fromEntries(formData.entries()); // Formdaki her şeyi objeye çevirir
+const rawData = Object.fromEntries(formData.entries()); 
 const validatedFields = ProductSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
@@ -69,42 +70,57 @@ const validatedFields = ProductSchema.safeParse(rawData);
 
     revalidatePath("/admin/products");
     
-  } catch (err: any) {
+  } catch (err: unknown) {
+    if (err instanceof Error) console.error(err.message);
+    return { error: "Failed to create product in Stripe or Database." };
     
    
-    return { error: "Failed to create product in Stripe or Database." };
   }
 
   redirect("/admin/products");
 };
 
-export const deleteProductAction = async (prevState: any,formData: FormData) => {
+export async function deleteProductAction(productId: string) {
   
   const adminUser = await getAdmin();
   if (!adminUser) {
     return { error: "Only users with admin privileges can delete products." };
   }
 
-  const productId = formData.get("id") as string;
-
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-  });
-
-  if (product && product.images.length > 0) {
+  try {
     
-    await del(product.images[0]);
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    
+    if (!product) {
+      return { error: "Product not found." };
+    }
+
+    
+    if (product.images && product.images.length > 0) {
+      await del(product.images[0]);
+    }
+
+    
+    await deleteProductFromDb(productId); // Dosyanın en üstüne import etmeyi unutma!
+
+  } catch (err) {
+   
+    console.error("Delete Error:", err);
+    return { error: "Failed to delete product." };
   }
 
-  await prisma.product.delete({
-    where: { id: productId },
-  });
-
+ 
   revalidatePath("/admin/products");
-  redirect("/admin/products");
-};
+  
+  
+  return { success: "Product deleted successfully." };
+}
 
-export const updateProductAction = async (prevState: any, formData: FormData) => {
+
+export const updateProductAction = async (prevState: unknown, formData: FormData) => {
   const adminUser = await getAdmin();
   if (!adminUser) return { error: "Admin authentication required." };
 
@@ -121,7 +137,7 @@ export const updateProductAction = async (prevState: any, formData: FormData) =>
 
   try {
     // 1. Mevcut ürünü bul (Eski Stripe ID'leri lazım)
-    const existingProduct = await getProductById(productId);
+    const existingProduct = (await getProductById(productId)) as Product | null;
 
     if (!existingProduct) return { error: "Product not found." };
 
@@ -136,7 +152,7 @@ export const updateProductAction = async (prevState: any, formData: FormData) =>
     // Eğer fiyat değiştiyse Stripe'ta yeni fiyat oluşturmalıyız
     if (price !== existingProduct.price) {
       const newStripePrice = await stripe.prices.create({
-        product: existingProduct.stripeProductId!,
+        product: existingProduct.stripeProductId,
         unit_amount: Math.round(price * 100),
         currency: currency.toLowerCase(),
       });
@@ -145,7 +161,7 @@ export const updateProductAction = async (prevState: any, formData: FormData) =>
 
     // Ürün adı veya açıklaması değiştiyse Stripe ürününü de güncelle
     if (title !== existingProduct.title || description !== existingProduct.description) {
-      await stripe.products.update(existingProduct.stripeProductId!, {
+      await stripe.products.update(existingProduct.stripeProductId, {
         name: title,
         description: description,
       });
@@ -164,8 +180,8 @@ export const updateProductAction = async (prevState: any, formData: FormData) =>
 
     revalidatePath("/admin/products");
     
-  } catch (err: any) {
-    console.error("Update Error:", err);
+  } catch (err: unknown) {
+    if (err instanceof Error) console.error("Update Error:", err.message);
     return { error: "Failed to update product." };
   }
 

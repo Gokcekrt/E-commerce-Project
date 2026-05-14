@@ -5,6 +5,7 @@ import { auth0 } from "@/lib/auth0";
 import Navbar from "@/components/Navbar";
 import { getAdmin } from "@/lib/authz";
 import { CartProvider } from "@/context/CartContext";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default async function RootLayout({
             <Navbar session={session} isAdmin={isAdmin} />
             <main>{children}</main>
           </CartProvider>
+          <Toaster />
         </body>
       </html>
     );

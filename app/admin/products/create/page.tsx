@@ -117,7 +117,6 @@ export default function CreateProductPage() {
               />
             </div>
 
-            {/* 4. ADIM: Kendi butonumuz buraya geldi */}
             <SubmitButton />
           </form>
         </CardContent>

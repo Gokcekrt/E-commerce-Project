@@ -2,16 +2,9 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Product } from "@/lib/schemas";
+import { CartItemType } from "@/lib/schemas";
 
-// Sepetteki ürün
-export interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  image: string;
-  quantity: number;
-  stripePriceId: string;
-}
+export type CartItem = CartItemType;
 
 interface CartContextType {
   cartItems: CartItem[];

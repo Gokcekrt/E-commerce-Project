@@ -88,7 +88,7 @@ export async function getAdmin(): Promise<Auth0SessionUser | null> {
 
 export async function requireUserOr401(): Promise<Auth0SessionUser | Response> {
   const user = await getSessionUser();
-  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return Response.json({ error: "Please sign in to checkout" }, { status: 401 });
   return user;
 }
 

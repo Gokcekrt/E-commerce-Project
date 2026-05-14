@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { CreateProductPayload } from "@/lib/schemas";
+import { Prisma } from "@prisma/client";
 
 
 export const createProduct = async (data: CreateProductPayload) => {
@@ -36,7 +37,7 @@ export const getProductById = async (id: string) => {
 };
 
 // 4. Ürünü Güncelle (updateProductAction için)
-export const updateProduct = async (id: string, data: any) => {
+export const updateProduct = async (id: string, data: Prisma.ProductUpdateInput) => {
   return await prisma.product.update({
     where: { id },
     data: data,
