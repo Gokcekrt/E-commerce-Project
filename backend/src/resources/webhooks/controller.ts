@@ -1,7 +1,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { STRIPE_ENDPOINT_SECRET, stripe } from '../../common/stripe';
-import { PrismaClient } from '@prisma/client';
+
 import emailService from '../../services/emailService'; 
 import { PrismaClient, Prisma } from '@prisma/client';
 
@@ -52,15 +52,27 @@ const receiveUpdates = async (request: Request, response: Response, next: NextFu
      const lineItems = sessionWithItems.line_items?.data || [];
      const customerEmail= sessionWithItems.customer_details?.email || 'Unknown';
      const totalAmount= (sessionWithItems.amount_total || 0) / 100; // Stripe amount is in cents
+
+
+     const userId = sessionWithItems.metadata?.userId; 
+
+
+
+
+     if (!userId) {
+    console.error("Error: User ID missing in metadata!");
+    return response.status(400).send("User ID missing in metadata");
+} 
       //veritabanına kaydetme işlemi
       const newOrder = await prisma.order.create({ //prisma order create ise kendi oluşturduğumuz modelin adı
         data: {
-          userEmail: customerEmail,
+          userId: userId as string,
           totalAmount: totalAmount,
           stripeSessionId: eventData.id,
-          items :lineItems as unknown as Prisma.InputJsonValue
+          items :lineItems as unknown as Prisma.InputJsonValue,
+          status: "PAID",
       }});
-      console.log(`New order created in database: ${newOrder.userEmail}`);
+      console.log(`New order created in database: ${newOrder.userId}`);
       await emailService.sendEmail(customerEmail, newOrder.id, totalAmount);
 
       for (const item of lineItems){

@@ -34,10 +34,13 @@ model User {
 }
 
 model Order {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  userEmail       String // Siparişi veren kişinin emaili
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
   totalAmount     Float // Toplam ödenen tutar
   stripeSessionId String? // Stripe'taki işlem numarası (kontrol için)
   items           Json // Satın alınan ürünlerin listesi
   createdAt       DateTime @default(now())
+  userId          String
+  status          String   @default("PAID")
+  updatedAt       DateTime @updatedAt
 }

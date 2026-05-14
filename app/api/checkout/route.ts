@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     if (!session) {
       return NextResponse.json({ error: "Please sign in to checkout " }, { status: 401 });
     }
-
+const user = session.user;
     // Sepetteki ürünleri body'den alıyoruz
     const { items } = await req.json();
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       success_url: `${process.env.AUTH0_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.AUTH0_BASE_URL}/cart`,
       metadata: {
-        userId: session.user.sub, // Kimin satın aldığını Stripe'a not ediyoruz
+        userId: user.sub || user.id,
       },
     });
 
